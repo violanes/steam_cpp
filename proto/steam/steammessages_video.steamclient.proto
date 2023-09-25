@@ -1,0 +1,171 @@
+import "steammessages_base.proto";
+import "steammessages_unified_base.steamclient.proto";
+
+option cc_generic_services = true;
+
+message CVideo_ClientGetVideoURL_Request {
+	optional uint64 video_id = 1 [(description) = "Video ID"];
+	optional uint32 client_cellid = 2 [(description) = "Cell ID of client, zero if unknown"];
+}
+
+message CVideo_ClientGetVideoURL_Response {
+	optional uint64 video_id = 1 [(description) = "Video ID"];
+	optional string video_url = 2 [(description) = "URL for video manifest"];
+}
+
+message VideoBookmark {
+	optional uint32 app_id = 1 [(description) = "App ID"];
+	optional uint32 playback_position_in_seconds = 2 [(description) = "How many seconds into the video the bookmark is for"];
+	optional uint64 video_track_id = 3 [(description) = "video track choice."];
+	optional uint64 audio_track_id = 4 [(description) = "audio track choice."];
+	optional uint64 timedtext_track_id = 5 [(description) = "timedtimed or subtitle track choice"];
+	optional uint32 last_modified = 6 [(description) = "when we recorded it was last modified. Not settable."];
+	optional bool hide_from_watch_history = 7 [default = false, (description) = "Whether I want to show this in my history"];
+	optional bool hide_from_library = 8 [default = false, (description) = "Whether I want to show this in my library"];
+}
+
+message CVideo_SetVideoBookmark_Notification {
+	repeated .VideoBookmark bookmarks = 1 [(description) = "list of bookmarks we want to store."];
+}
+
+message CVideo_GetVideoBookmarks_Request {
+	repeated uint32 appids = 1 [(description) = "List of App IDs to grab bookmarks for. Can be empty if using updated_since."];
+	optional uint32 updated_since = 2 [(description) = "Only return results after time. Min value is 1. (seconds since epoch January 1st, 1970 Unix Time)"];
+}
+
+message CVideo_GetVideoBookmarks_Response {
+	repeated .VideoBookmark bookmarks = 1 [(description) = "List of bookmarks we found. Can be empty."];
+}
+
+message CVideo_GameClipRepresentation {
+	optional string representation_name = 2 [(description) = "EG 480p30"];
+	optional uint32 horizontal_resolution = 3 [(description) = "Width in pixels if contains video"];
+	optional uint32 vertical_resolution = 4 [(description) = "Height in pixels if contains video"];
+	optional double frame_rate = 5 [(description) = "Frame Rate if contains video"];
+	optional uint32 bandwidth = 6 [(description) = "Kbps"];
+	optional uint32 audio_sample_rate = 7 [(description) = "Sample rate in Hz if contains audio"];
+	optional string frame_rate_string = 8 [(description) = "Frame Rate string if contains video"];
+	optional string codec = 9 [(description) = "codec(s) used"];
+	optional uint32 audio_channel_config = 10 [(description) = "audio channel config if relevant"];
+}
+
+message CVideo_GameClipComponent {
+	optional string component_name = 1 [(description) = "video/audio/etc"];
+	optional uint32 contents = 2 [(description) = "EVideoTrackContents"];
+	optional uint32 segment_size = 3 [(description) = "size of most segments (last may be shorter)"];
+	optional string file_type = 4 [(description) = "file type"];
+	repeated .CVideo_GameClipRepresentation representations = 5 [(description) = "list of representations"];
+}
+
+message CVideo_CreateGameClip_Request {
+	optional uint32 app_id = 1 [(description) = "app ID stream is tagged with"];
+	optional uint32 num_segments = 2 [(description) = "number of segments in this clip"];
+	optional uint32 length_milliseconds = 3 [(description) = "length of video in ms"];
+	optional uint32 segment_duration_timescale = 4 [(description) = "timescale (denominator) for segment duration below, eg 1000 for milliseconds"];
+	optional uint32 segment_duration = 5 [(description) = "length of most segments in 'timescale' units (last may be shorter)"];
+	repeated .CVideo_GameClipComponent components = 6 [(description) = "List of components"];
+}
+
+message CVideo_CreateGameClip_Response {
+	optional uint64 clip_id = 1 [(description) = "Clip ID if successful"];
+}
+
+message CVideo_GameClipSegmentInfo {
+	optional uint32 segment_number = 4 [(description) = "segment number"];
+	optional uint64 segment_size_bytes = 5 [(description) = "segment size in bytes"];
+}
+
+message CVideo_BeginGameClipSegmentsUpload_Request {
+	optional uint64 clip_id = 1 [(description) = "Clip ID"];
+	optional string component_name = 2 [(description) = "component segments belong to"];
+	optional string representation_name = 3 [(description) = "representation name"];
+	repeated .CVideo_GameClipSegmentInfo segments_to_store = 4 [(description) = "Segments the client has to upload"];
+}
+
+message CVideo_GameClipSegmentUploadInfo {
+	message HTTPHeaders {
+		optional string name = 1 [(description) = "HTTP header name"];
+		optional string value = 2 [(description) = "HTTP header value"];
+	}
+
+	optional .CVideo_GameClipSegmentInfo segment_info = 1 [(description) = "segment ID information"];
+	optional string url_host = 2 [(description) = "Host name of server to which file should be uploaded via HTTP PUT."];
+	optional string url_path = 3 [(description) = "Relative path on server to which file should be uploaded."];
+	optional bool use_https = 4 [(description) = "If true, use https, otherwise use http."];
+	repeated .CVideo_GameClipSegmentUploadInfo.HTTPHeaders request_headers = 5 [(description) = "Name-value pairs to be sent in HTTP PUT request."];
+}
+
+message CVideo_BeginGameClipSegmentsUpload_Response {
+	repeated .CVideo_GameClipSegmentUploadInfo segments_needed = 1 [(description) = "Segments that need uploading"];
+	optional bool call_again = 2 [(description) = "If true, you should ask again once you've uploaded the segments indicated in this response. There may be more we want. If there was no work to do in this response, then wait a few seconds before asking again"];
+}
+
+message CVideo_CommitGameClipSegmentsUpload_Request {
+	optional uint64 clip_id = 1 [(description) = "Clip ID"];
+	optional string component_name = 2 [(description) = "component segments belong to"];
+	optional string representation_name = 3 [(description) = "representation name"];
+	optional uint32 first_segment_number = 4 [(description) = "Segment Number of first segment uploaded in this batch"];
+	optional uint32 num_segments = 5 [(description) = "Number of segments in Batch"];
+	optional uint32 upload_result = 6 [(description) = "eresult of the upload attempt"];
+}
+
+message CVideo_CommitGameClipSegmentsUpload_Response {
+}
+
+message CVideo_UnlockedH264_Notification {
+	optional bytes encryption_key = 1;
+}
+
+message CFovasVideo_ClientGetOPFSettings_Request {
+	optional uint32 app_id = 1 [(description) = "App ID"];
+	optional uint32 client_cellid = 2 [(description) = "Cell ID of client, zero if unknown"];
+}
+
+message CFovasVideo_ClientGetOPFSettings_Response {
+	optional uint32 app_id = 1 [(description) = "App ID"];
+	optional string opf_settings = 2 [(description) = "JSON blob of OPF Settings"];
+}
+
+service Video {
+	option (service_description) = "Video methods";
+
+	rpc ClientGetVideoURL (.CVideo_ClientGetVideoURL_Request) returns (.CVideo_ClientGetVideoURL_Response) {
+		option (method_description) = "Get the initial URL to begin streaming a video";
+	}
+
+	rpc SetVideoBookmark (.CVideo_SetVideoBookmark_Notification) returns (.NoResponse) {
+		option (method_description) = "Bookmarks the locations in the video the user has reached. As as record playback settings per video. Fire and forget.";
+	}
+
+	rpc GetVideoBookmarks (.CVideo_GetVideoBookmarks_Request) returns (.CVideo_GetVideoBookmarks_Response) {
+		option (method_description) = "Returns the video bookmarks locations for the specific videos. Includes playback settings per video";
+	}
+
+	rpc CreateGameClip (.CVideo_CreateGameClip_Request) returns (.CVideo_CreateGameClip_Response) {
+		option (method_description) = "Create a game recording clip video";
+	}
+
+	rpc BeginGameClipSegmentsUpload (.CVideo_BeginGameClipSegmentsUpload_Request) returns (.CVideo_BeginGameClipSegmentsUpload_Response) {
+		option (method_description) = "Begin a batch of segment uploads for a GameClip";
+	}
+
+	rpc CommitGameClipSegmentsUpload (.CVideo_CommitGameClipSegmentsUpload_Request) returns (.CVideo_CommitGameClipSegmentsUpload_Response) {
+		option (method_description) = "Note completion of a batch of GameClip segment uploads";
+	}
+}
+
+service VideoClient {
+	option (service_execution_site) = k_EProtoExecutionSiteSteamClient;
+
+	rpc NotifyUnlockedH264 (.CVideo_UnlockedH264_Notification) returns (.NoResponse) {
+		option (method_description) = "Notification from server to client that h264 has been unlocked";
+	}
+}
+
+service FovasVideo {
+	option (service_description) = "Fovas Video Service Methods";
+
+	rpc ClientGetOPFSettings (.CFovasVideo_ClientGetOPFSettings_Request) returns (.CFovasVideo_ClientGetOPFSettings_Response) {
+		option (method_description) = "Retrieve the OPF settings JSON blob. Available via the Client for 360 Player App";
+	}
+}
