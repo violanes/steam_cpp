@@ -132,23 +132,3 @@ void c_encrypted_connection::handle_encrypt_result(std::vector<uint8_t>* data) {
 	if (fn_on_connect)
 		fn_on_connect();
 }
-
-/*
-void c_encrypted_connection::send_shit(const google::protobuf::Message &message) {
-	std::vector<uint8_t> buf{};
-
-	CMsgProtoBufHeader proto;
-	proto.set_steamid(76561197960265728);
-	proto.set_client_sessionid(0);
-
-	buf.insert(buf.end(), sizeof(MsgHdrProtoBuf) + proto.ByteSizeLong() + message.ByteSizeLong(), 0);
-
-	auto header = reinterpret_cast<MsgHdrProtoBuf*>(buf.data());
-	header->headerLength = (int) proto.ByteSizeLong();
-	header->msg = (uint32_t)EMsg::ClientLogon | 0x80000000;
-
-	proto.SerializeToArray(header->proto, (int)proto.ByteSizeLong());
-	message.SerializeToArray(header->proto + proto.ByteSizeLong(), (int)message.ByteSizeLong());
-
-	send(buf);
-}*/

@@ -3,6 +3,7 @@
 
 #include "c_steam_user.hpp"
 #include "c_steam_friends.hpp"
+#include "c_steam_trading.hpp"
 
 class c_steam_client : public cmc_client {
 public:
@@ -16,6 +17,7 @@ public:
 
 	c_steam_user* get_user() { return (c_steam_user*)m_handlers["steam_user"].get(); }
 	c_steam_friends* get_friends() { return (c_steam_friends*)m_handlers["steam_friends"].get(); }
+	c_steam_trading* get_trading() { return (c_steam_trading*)m_handlers["steam_trading"].get(); }
 private:
 	std::vector<EMsg> m_callbacks = {};
 	std::unique_ptr<c_web_api> m_web_api;

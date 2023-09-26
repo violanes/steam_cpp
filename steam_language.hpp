@@ -1846,6 +1846,35 @@ enum class EResult
 	BadResponse = 76,
 	RequirePasswordReEntry = 77,
 };
+
+enum EPersonaState {
+	Offline = 0,
+	Online = 1,
+	Busy = 2,
+	Away = 3,
+	Snooze = 4,
+	LookingToTrade = 5,
+	LookingToPlay = 6,
+	Invisible = 7,
+};
+
+enum class EChatEntryType
+{
+	Invalid = 0,
+	ChatMsg = 1,
+	Typing = 2,
+	InviteGame = 3,
+	LeftConversation = 6,
+	Entered = 7,
+	WasKicked = 8,
+	WasBanned = 9,
+	Disconnected = 10,
+	HistoricalChat = 11,
+	Reserved1 = 12,
+	Reserved2 = 13,
+	LinkBlocked = 14,
+};
+
 #pragma pack(push,1)
 struct msg_header {
 	std::uint32_t msg = 0;

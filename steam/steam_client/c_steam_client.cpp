@@ -8,6 +8,7 @@ c_steam_client::c_steam_client() {
 
 	m_handlers["steam_user"] = std::make_shared<c_steam_user>(this);
 	m_handlers["steam_friends"] = std::make_shared<c_steam_friends>(this);
+	m_handlers["steam_trading"] = std::make_shared<c_steam_trading>(this);
 
 	m_on_logon = [&](const CMsgClientLogonResponse& response) {
 		if (std::find(m_callbacks.begin(), m_callbacks.end(), EMsg::ClientLogOnResponse) == m_callbacks.end())
