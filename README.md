@@ -15,3 +15,4 @@ Crossplatform port of [SteamKit](https://github.com/SteamRE/SteamKit) written in
 - Heartbeat
 - Friends list parsing
 - Traffic encryption (with HMAC support)
+- Steam authentication (2fa support: via email, mobile confirmation and mobile code)
