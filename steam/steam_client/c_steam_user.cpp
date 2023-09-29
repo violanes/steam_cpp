@@ -6,6 +6,7 @@ void c_steam_user::logon(const c_steam_user::c_logon_details& details) {
 	CMsgClientLogon logon;
 	logon.set_account_name(details.username);
 	logon.set_password(details.password);
+	logon.set_access_token(details.access_token);
 	logon.set_protocol_version(65580);
 
 	send(EMsg::ClientLogon, logon);

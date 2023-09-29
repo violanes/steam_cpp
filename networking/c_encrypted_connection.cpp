@@ -1,6 +1,6 @@
 #include "c_encrypted_connection.hpp"
 #include "encryption/c_encryption_with_hmac.hpp"
-#include "../steam_language.hpp"
+#include "steam_language.hpp"
 
 #include <cryptopp/crc.h>
 #include <cryptopp/rsa.h>

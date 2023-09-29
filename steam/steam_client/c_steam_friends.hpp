@@ -16,10 +16,10 @@ public:
 	std::string_view get_profile_name() { return profile_name; }
 	std::vector<uint64_t> get_friends_list() { return m_friends; }
 private:
-	void handle_friends_list(const std::vector<uint8_t>& buffer);
-	void handle_account_info(const std::vector<uint8_t>& buffer);
-	void handle_chat_message(const std::vector<uint8_t>& buffer);
-	void handle_friend_message(const std::vector<uint8_t>& buffer);
+	void handle_friends_list(const proto_response& message);
+	void handle_account_info(const proto_response& buffer);
+	void handle_chat_message(const proto_response& buffer);
+	void handle_friend_message(const proto_response& buffer);
 
 	std::string profile_name{};
 	std::vector<uint64_t> m_friends{};

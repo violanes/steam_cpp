@@ -5,10 +5,12 @@
 
 c_steam_client::c_steam_client() {
 	m_web_api = std::make_unique<c_web_api>();
+	m_steam_auth = std::make_unique<c_steam_authentication>(this);
 
 	m_handlers["steam_user"] = std::make_shared<c_steam_user>(this);
 	m_handlers["steam_friends"] = std::make_shared<c_steam_friends>(this);
 	m_handlers["steam_trading"] = std::make_shared<c_steam_trading>(this);
+	m_handlers["steam_unified_messages"] = std::make_shared<c_steam_unified_messages>(this);
 
 	m_on_logon = [&](const CMsgClientLogonResponse& response) {
 		if (std::find(m_callbacks.begin(), m_callbacks.end(), EMsg::ClientLogOnResponse) == m_callbacks.end())
@@ -48,6 +50,10 @@ void c_steam_client::set_steam_id(uint64_t steam_id) {
 
 void c_steam_client::send(EMsg type, const google::protobuf::Message& message) {
 	cmc_client::send(type, message);
+}
+
+void c_steam_client::send(const std::vector<uint8_t>& buffer) {
+	cmc_client::send(buffer);
 }
 
 void c_steam_client::add_callback(EMsg callback_type) {

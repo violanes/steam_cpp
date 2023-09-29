@@ -6,5 +6,5 @@ public:
 
 	void initiate_trade(uint64_t steam_id);
 private:
-	void handle_trade_result(const std::vector<uint8_t>& buffer);
+	void handle_trade_result(const proto_response& buffer);
 };

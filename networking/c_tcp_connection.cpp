@@ -6,7 +6,8 @@ c_tcp_connection::c_tcp_connection(std::string_view ip, uint16_t port) : i_conne
 }
 
 c_tcp_connection::~c_tcp_connection() {
-	m_listener.detach();
+	if (m_listener.joinable())
+		m_listener.detach();
 }
 
 bool c_tcp_connection::connect() {
@@ -28,6 +29,9 @@ void c_tcp_connection::disconnect() {
 	// TODO: disconnect from the server!
 
 	m_listener.detach();
+
+	if (m_socket->is_open())
+		m_socket->close();
 }
 
 void c_tcp_connection::send(const std::vector<uint8_t>& binary) {
@@ -42,8 +46,6 @@ void c_tcp_connection::send(const std::vector<uint8_t>& binary) {
 
 	boost::system::error_code error;
 	m_socket->write_some(boost::asio::buffer(buffer), error);
-
-	// TODO: handle send errors
 }
 
 void c_tcp_connection::serve() {
@@ -62,32 +64,22 @@ void c_tcp_connection::listen() {
 			printf("connection closed\n"); // TODO: call onDisconnected
 			break;
 		} else if (error) {
-			printf("error connecting to the server!\n");
-			return;
-			//throw boost::system::system_error(error);
+			throw boost::system::system_error(error);
 		}
 
-		if (len != sizeof(c_tcp_packet)) {
-			printf("received unknown message!\n");
+		if (len != sizeof(c_tcp_packet))
 			continue;
-		}
 
 		const auto packet = reinterpret_cast<const c_tcp_packet*>(buffer.data());
-		if (packet->magic != TCP_MAGIC) {
-			printf("invalid packet signature!\n");
+		if (packet->magic != TCP_MAGIC)
 			continue;
-		}
-
-		printf("[socket] received packet with length : %u, magic : %u\n", packet->length, packet->magic);
 
 		std::vector<uint8_t> packet_binary{};
 		packet_binary.resize(packet->length);
 
 		len = m_socket->read_some(boost::asio::buffer(packet_binary), error);
-		if (len != packet->length) {
-			printf("packet length mismatch\n");
-			break;
-		}
+		if (len != packet->length)
+			continue;
 
 		if (fn_on_read)
 			fn_on_read(packet_binary);

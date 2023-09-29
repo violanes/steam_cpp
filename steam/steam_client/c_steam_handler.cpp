@@ -13,7 +13,7 @@ bool c_steam_handler::has_handler(EMsg type) {
 	return m_callbacks.contains(type);
 }
 
-void c_steam_handler::execute(EMsg type, const std::vector<uint8_t>& message) {
+void c_steam_handler::execute(EMsg type, const proto_response& message) {
 	if (!has_handler(type))
 		return;
 

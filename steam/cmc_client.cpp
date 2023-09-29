@@ -15,19 +15,19 @@ bool cmc_client::connect(std::string_view ip, uint16_t port) {
 	if (!m_connection->connect())
 		return false;
 
-	//m_connection_mutex.lock();
-
 	bool connected = true;
 	bool server_responded = false;
 
-	m_connection->set_connect_callback([&]() -> void { server_responded = true; /*m_connection_mutex.unlock();*/ });
-	m_connection->set_disconnect_callback([&](...) -> void {
-		connected = false;
-		//m_connection_mutex.unlock();
+	m_connection->set_connect_callback([&]() -> void {
+		CMsgClientHello hello_msg;
+		hello_msg.set_protocol_version(65580);
+		send(EMsg::ClientHello, hello_msg);
 		server_responded = true;
 	});
-
-	//m_connection_mutex.lock();
+	m_connection->set_disconnect_callback([&](...) -> void {
+		connected = false;
+		server_responded = true;
+	});
 
 	// for some reason, when building under MSVC mutex crashes right after unlocking it
 	// probably caused by incorrect mutex ownership transfer, needs research
@@ -45,7 +45,17 @@ void cmc_client::send(EMsg type, const google::protobuf::Message& message) {
 
 	CMsgProtoBufHeader proto_header;
 	proto_header.set_steamid(m_steam_id);
-	proto_header.set_client_sessionid(0);
+	proto_header.set_client_sessionid((int)m_session_id);
+
+	if (!m_next_job_name.empty()) {
+		proto_header.set_target_job_name(m_next_job_name);
+		m_next_job_name.clear();
+	}
+
+	if (m_next_job_id) {
+		proto_header.set_jobid_source(m_next_job_id);
+		m_next_job_id = 0;
+	}
 
 	buffer.insert(buffer.end(), sizeof(MsgHdrProtoBuf) + proto_header.ByteSizeLong() + message.ByteSizeLong(), 0);
 
@@ -56,6 +66,10 @@ void cmc_client::send(EMsg type, const google::protobuf::Message& message) {
 	proto_header.SerializeToArray(header->proto, (int)proto_header.ByteSizeLong());
 	message.SerializeToArray(header->proto + (int)proto_header.ByteSizeLong(), (int)message.ByteSizeLong());
 
+	m_connection->send(buffer);
+}
+
+void cmc_client::send(const std::vector<uint8_t>& buffer) {
 	m_connection->send(buffer);
 }
 
@@ -89,16 +103,18 @@ void cmc_client::on_read(const std::vector<uint8_t>& buffer) {
 
 		job_id = proto_header.jobid_source();
 		message = std::vector<uint8_t>(buffer.begin() + sizeof(MsgHdrProtoBuf) + header->headerLength, buffer.end());
+
+		handle_message(type, message, proto_header, job_id);
 	} else {
 		auto header = reinterpret_cast<const ExtendedClientMsgHdr*>(buffer.data());
 		job_id = header->sourceJobID;
 		message = std::vector<uint8_t>(buffer.begin() + sizeof(ExtendedClientMsgHdr), buffer.end());
-	}
 
-	handle_message(type, message, job_id);
+		handle_message(type, message, {}, job_id);
+	}
 }
 
-void cmc_client::handle_message(EMsg type, const std::vector<uint8_t>& message, uint64_t job_id) {
+void cmc_client::handle_message(EMsg type, const std::vector<uint8_t>& message, const CMsgProtoBufHeader& proto_header, uint64_t job_id) {
 	switch (type) {
 		case Multi: {
 			CMsgMulti msg_multi;
@@ -146,7 +162,9 @@ void cmc_client::handle_message(EMsg type, const std::vector<uint8_t>& message, 
 			m_steam_id = 0;
 
 			m_heartbeat_delay = 0;
-			m_heart_beat.detach();
+
+			if (m_heart_beat.joinable())
+				m_heart_beat.detach();
 
 			CMsgClientLoggedOff logoff;
 			logoff.ParseFromArray(message.data(), (int)message.size());
@@ -158,7 +176,6 @@ void cmc_client::handle_message(EMsg type, const std::vector<uint8_t>& message, 
 		case ClientCMList: {
 			CMsgClientCMList cm_list;
 			cm_list.ParseFromArray(message.data(), (int)message.size());
-			printf("received cm list!\n");
 			break;
 		}
 		default: {
@@ -166,11 +183,14 @@ void cmc_client::handle_message(EMsg type, const std::vector<uint8_t>& message, 
 				if (!handler.second->has_handler(type))
 					continue;
 
-				handler.second->execute(type, message);
+				proto_response resp;
+				resp.header = proto_header;
+				resp.buffer = message;
+				handler.second->execute(type, resp);
 				return;
 			}
 
-			//printf("received unacknowledged message of type : %d (buffer %zu)\n", type, message.size());
+			printf("received unacknowledged message of type : %d (buffer %zu)\n", type, message.size());
 			break;
 		}
 	}

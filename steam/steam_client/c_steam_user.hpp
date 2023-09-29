@@ -5,6 +5,7 @@ public:
 	struct c_logon_details {
 		std::string username;
 		std::string password;
+		std::string access_token;
 	};
 
 	struct c_logon_result {
