@@ -10,9 +10,10 @@ proto_response c_steam_unified_messages::send_message(std::string_view name, con
 	steam_client->send(steam_client->get_steam_id() ? ServiceMethodCallFromClient : ServiceMethodCallFromClientNonAuthed, message);
 
 	service_message.buffer.clear();
+	service_message.header.set_eresult(0);
 
 	std::unique_lock<std::mutex> lock(m_job_mutex);
-	m_cv.wait(lock, [this] { return !service_message.buffer.empty(); });
+	m_cv.wait(lock, [this] { return service_message.header.eresult() > 0 || !service_message.buffer.empty(); });
 
 	return service_message;
 }

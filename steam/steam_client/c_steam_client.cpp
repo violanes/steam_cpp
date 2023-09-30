@@ -44,10 +44,6 @@ bool c_steam_client::connect() {
 	return cmc_client::connect(servers.begin()->address, servers.begin()->port);
 }
 
-void c_steam_client::set_steam_id(uint64_t steam_id) {
-	m_steam_id = steam_id;
-}
-
 void c_steam_client::send(EMsg type, const google::protobuf::Message& message) {
 	cmc_client::send(type, message);
 }

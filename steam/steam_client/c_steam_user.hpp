@@ -3,9 +3,27 @@
 class c_steam_user : public c_steam_handler {
 public:
 	struct c_logon_details {
-		std::string username;
-		std::string password;
-		std::string access_token;
+		std::string username{};
+		std::string password{};
+		std::string access_token{};
+		std::string machine_name = "ABC123";
+
+		std::string auth_code{};
+		std::string two_factor_code{};
+		std::string login_key{};
+
+		std::string sentry_file_hash{};
+
+		uint32_t login_id = 0;
+
+		bool should_remember = false;
+		bool request_steam2_ticket = false;
+
+		EOSType os_type = EOSType::Android9;
+		std::string client_language = "english";
+
+		uint32_t account_id = 0;
+		uint32_t account_instance = 1;
 	};
 
 	struct c_logon_result {

@@ -52,7 +52,7 @@ void cmc_client::send(EMsg type, const google::protobuf::Message& message) {
 		m_next_job_name.clear();
 	}
 
-	if (m_next_job_id) {
+	if (m_next_job_id > 0) {
 		proto_header.set_jobid_source(m_next_job_id);
 		m_next_job_id = 0;
 	}
@@ -190,7 +190,7 @@ void cmc_client::handle_message(EMsg type, const std::vector<uint8_t>& message, 
 				return;
 			}
 
-			printf("received unacknowledged message of type : %d (buffer %zu)\n", type, message.size());
+			//printf("received unacknowledged message of type : %d (buffer %zu)\n", type, message.size());
 			break;
 		}
 	}

@@ -11,7 +11,8 @@ public:
 	explicit c_steam_client();
 	bool connect();
 
-	void set_steam_id(uint64_t steam_id);
+	void set_steam_id(uint64_t steam_id) { m_steam_id = steam_id; }
+	void set_session_id(uint64_t session_id) { m_session_id = session_id; }
 	uint64_t get_steam_id() { return m_steam_id; }
 
 	void send(EMsg type, const google::protobuf::Message& message) override;
