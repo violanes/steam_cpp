@@ -4,7 +4,6 @@
 #include <random>
 
 c_steam_client::c_steam_client() {
-	m_web_api = std::make_unique<c_web_api>();
 	m_steam_auth = std::make_unique<c_steam_authentication>(this);
 
 	m_handlers["steam_user"] = std::make_shared<c_steam_user>(this);
@@ -19,6 +18,7 @@ c_steam_client::c_steam_client() {
 		c_steam_user::c_logon_result result{};
 		result.result = static_cast<EResult>(response.eresult());
 		result.extended_result = response.eresult_extended();
+		result.web_nonce = response.webapi_authenticate_user_nonce();
 		result.success = (result.result == EResult::OK);
 
 		get_user()->logon_processed(result);

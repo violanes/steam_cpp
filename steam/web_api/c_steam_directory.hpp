@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+
 class c_steam_directory {
 public:
 	struct steam_server {

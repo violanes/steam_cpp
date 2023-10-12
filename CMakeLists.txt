@@ -37,7 +37,9 @@ add_library(steam_cpp STATIC ${proto_files} networking/steam_language.hpp networ
         steam/web_api/c_steam_directory.hpp steam/steam_client/c_steam_trading.cpp steam/steam_client/c_steam_trading.hpp
         steam/authentication/c_steam_authentication.cpp steam/authentication/c_steam_authentication.hpp steam/steam_client/c_steam_unified_messages.cpp
         steam/steam_client/c_steam_unified_messages.hpp steam/authentication/c_auth_session.cpp steam/authentication/c_auth_session.hpp
-        steam/authentication/c_credential_auth_session.cpp steam/authentication/c_credential_auth_session.hpp helpers/bit_vector64.hpp)
+        steam/authentication/c_credential_auth_session.cpp steam/authentication/c_credential_auth_session.hpp helpers/bit_vector64.hpp steam/guard/c_steam_guard_account.cpp
+        steam/guard/c_steam_guard_account.hpp steam/guard/session_data.cpp steam/guard/session_data.hpp steam/guard/c_trade_manager.cpp steam/guard/c_trade_manager.hpp 
+        steam/guard/c_steam_confirmation.cpp steam/guard/c_steam_confirmation.hpp)
 
 target_include_directories(steam_cpp PUBLIC ${Boost_INCLUDE_DIR})
 

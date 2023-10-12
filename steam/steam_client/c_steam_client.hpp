@@ -32,6 +32,5 @@ public:
 private:
 	std::vector<EMsg> m_callbacks = {};
 
-	std::unique_ptr<c_web_api> m_web_api;
 	std::unique_ptr<c_steam_authentication> m_steam_auth;
 };

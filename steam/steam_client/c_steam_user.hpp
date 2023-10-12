@@ -29,6 +29,8 @@ public:
 	struct c_logon_result {
 		bool success;
 		EResult result;
+
+		std::string web_nonce;
 		int32_t extended_result;
 	};
 
