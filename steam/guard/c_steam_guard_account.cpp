@@ -5,14 +5,14 @@
 #include <cryptopp/sha.h>
 #include <curl/curl.h>
 #include <regex>
+#include <sstream>
 
 #include "c_steam_guard_account.hpp"
 #include "../web_api/c_web_api.hpp"
 
 #undef min
 
-std::vector<uint8_t> g_steam_guard_code_translations = {50, 51, 52, 53, 54, 55, 56, 57, 66, 67, 68, 70, 71,
-														72, 74, 75, 77, 78, 80, 81, 82, 84, 86, 87, 88, 89};
+std::vector<uint8_t> g_steam_guard_code_translations = {50, 51, 52, 53, 54, 55, 56, 57, 66, 67, 68, 70, 71, 72, 74, 75, 77, 78, 80, 81, 82, 84, 86, 87, 88, 89};
 
 c_steam_guard_account::c_steam_guard_account(const nlohmann::json& data) {
 	m_device_id = data["device_id"].get<std::string>();
@@ -73,6 +73,10 @@ std::unique_ptr<c_trade_manager> c_steam_guard_account::create_offer(std::string
 		trade_link.find("&token=") - (trade_link.find("?partner=") + 9));
 
 	return std::make_unique<c_trade_manager>(partner, token, steam_id, m_session_data.get());
+}
+
+std::unique_ptr<c_trade_manager> c_steam_guard_account::get_offer(std::string_view trade_id) {
+	return std::make_unique<c_trade_manager>(trade_id, m_session_data.get());
 }
 
 std::string c_steam_guard_account::get_steam_guard_code(uint64_t time) {

@@ -10,6 +10,8 @@ public:
 	std::string get_confirmation_query(std::string_view tag);
 
 	std::unique_ptr<c_trade_manager> create_offer(std::string_view trade_link, uint64_t steam_id);
+	std::unique_ptr<c_trade_manager> get_offer(std::string_view trade_id);
+
 	session_data* get_session() { return m_session_data.get(); }
 
 	std::string get_steam_guard_code(uint64_t time);

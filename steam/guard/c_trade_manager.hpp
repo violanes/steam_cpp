@@ -9,11 +9,15 @@ struct c_trade_info {
 	EResult result;
 };
 
+#include <vector>
+
 class c_trade_manager {
 public:
 	c_trade_manager(std::string_view partner, std::string_view token, uint64_t steam_id, session_data* session);
+	explicit c_trade_manager(std::string_view trade_id, session_data* session);
 
 	void send();
+	void accept();
 	void cancel();
 
 	c_trade_info poll_result();
@@ -34,10 +38,10 @@ private:
 	uint8_t m_context_id = 0;
 
 	uint64_t m_steam_id = 0;
-	std::string m_description;
+	std::string m_description{};
 
-	std::string m_partner;
-	std::string m_token;
+	std::string m_partner{};
+	std::string m_token{};
 
 	session_data* m_session_data;
 
@@ -47,4 +51,6 @@ private:
 	std::string m_trade_id;
 	bool m_mobile_confirmation = false;
 	bool m_email_confirmation = false;
+
+	bool m_local_offer = false;
 };
